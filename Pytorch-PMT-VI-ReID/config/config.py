@@ -5,9 +5,9 @@ cfg.SEED = 0
 
 # dataset
 cfg.DATASET = 'sysu'    # sysu or regdb
-cfg.DATA_PATH_SYSU = ' ../SYSU-MM01/'
+cfg.DATA_PATH_SYSU = '/root/dataset/sys/'
 cfg.DATA_PATH_RegDB = ' ../RegDB/'
-cfg.PRETRAIN_PATH = '../jx_vit_base_p16_224-80ecf9dd.pth '
+cfg.PRETRAIN_PATH = '/root/model/jx_vit_base_p16_224-80ecf9dd.pth/'
 
 cfg.START_EPOCH = 1
 cfg.MAX_EPOCH = 24
