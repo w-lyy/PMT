@@ -64,16 +64,42 @@ class build_vision_transformer(nn.Module):
 
 
     def forward(self, x):
-        features = self.base(x)
+        features,features2 = self.base(x)
+        f1, f2 = features.chunk(2, 0)
+        #--------max和avg------
+        f3_1,f4_1=features2.chunk(2,0)
+        B =f3_1.shape[0]
+        f3 = f3_1.permute(0, 2, 1).reshape((B, self.in_planes, 21, 10))
+        f4 = f4_1.permute(0, 2, 1).reshape((B, self.in_planes, 21, 10))
+        ir=nn.AvgPool2d(kernel_size=(21, 10))
+        rgb=nn.MaxPool2d(kernel_size=(21, 10))
+        f3=rgb(f3).squeeze()
+        f4=ir(f4).squeeze()
+        Qrgb=torch.mm(f1, f3.t())
+        Qir=torch.mm(f2, f4.t())
+        rrr = nn.Softmax(1)(Qrgb)
+        iii = nn.Softmax(1)(Qir)
+        x_rgb = torch.mm(rrr, f1)
+        x_ir = torch.mm(iii, f2)
+        #-------交叉—---
+        sim_rgbtoir = torch.mm(f1, f2.t())
+        sim_irtorgb = torch.mm(f2, f1.t())
+        sim_rgbtoir = nn.Softmax(1)(sim_rgbtoir)
+        sim_irtorgb = nn.Softmax(1)(sim_irtorgb)
+        x_rgbtoir = torch.mm(sim_rgbtoir, f2)
+        x_irtorgb = torch.mm(sim_irtorgb, f1)
+        f_r=f1+x_rgbtoir+x_rgb
+        f_i=f2+x_irtorgb+x_ir
+        features1=torch.cat([f_i,f_r])
+        feat1 = self.bottleneck(features1)
         feat = self.bottleneck(features)
-
         if self.training:
             cls_score = self.classifier(feat)
 
-            return cls_score, features
+            return cls_score, features,features1
 
         else:
-            return self.l2norm(feat)
+            return self.l2norm(feat1)
 
 
     def load_param(self, trained_path):
