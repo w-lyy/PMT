@@ -227,11 +227,11 @@ class ViT(nn.Module):
 
         x = self.norm(x)
 
-        return x[:, 0]
+        return x[:, 0],x[:, 1:,:]
 
     def forward(self,x):
-        x = self.forward_features(x)
-        return x
+        x,x1 = self.forward_features(x)
+        return x,x1
 
     def load_param(self, model_path):
         param_dict = torch.load(model_path, map_location='cpu')
