@@ -59,8 +59,8 @@ def extract_gall_feat(gall_loader):
         for batch_idx, (input, label) in enumerate(gall_loader):
             batch_num = input.size(0)
             input = Variable(input.cuda())
-            feat = model(input)
-            gall_feat[ptr:ptr + batch_num, :] = feat.detach().cpu().numpy()
+            feat1, feat2 = model(torch.cat([input, input])).chunk(2, 0)
+            gall_feat[ptr:ptr + batch_num, :] = feat1.detach().cpu().numpy()
             ptr = ptr + batch_num
 
     return gall_feat
@@ -74,8 +74,8 @@ def extract_query_feat(query_loader):
         for batch_idx, (input, label) in enumerate(query_loader):
             batch_num = input.size(0)
             input = Variable(input.cuda())
-            feat = model(input)
-            query_feat[ptr:ptr + batch_num, :] = feat.detach().cpu().numpy()
+            feat1, feat2 = model(torch.cat([input, input])).chunk(2, 0)
+            query_feat[ptr:ptr + batch_num, :] = feat1.detach().cpu().numpy()
             ptr = ptr + batch_num
 
     return query_feat
